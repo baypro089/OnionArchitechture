@@ -1,5 +1,5 @@
 ﻿using Application.Services;
-using Domain.Interfaces.Services;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +19,12 @@ namespace Application
             services.AddScoped<IAuthService, AuthService>();
 
             // Đăng ký TokenService tại đây
-            services.AddScoped<ITokenService, TokenService>();           
+            services.AddScoped<ITokenService, TokenService>();       
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IBookService, BookServiceImpl>();
+            services.AddScoped<IGenreService, GenreServiceImpl>();
+            services.AddScoped<ICatalogueService, CatalogueServiceImpl>();
+            services.AddScoped<IBookCatalogueService, BookCatalogueServiceImpl>();
             return services;
         }
     }

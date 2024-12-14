@@ -1,5 +1,5 @@
 ﻿using Domain.Entities;
-using Domain.Interfaces.Services;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services

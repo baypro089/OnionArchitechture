@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Genre
+    public class Genre : IAuditableEntity
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; } // int(11)
@@ -16,6 +16,10 @@ namespace Domain.Entities
         public int InActive { get; set; } // int(11)
 
         // Navigation Property
-       
+
+        public string? CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

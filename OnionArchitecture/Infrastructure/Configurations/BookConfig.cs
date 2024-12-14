@@ -30,7 +30,6 @@ namespace Infrastructure.Data.Configurations
                 .IsRequired(); // yêu cầu bắt buộc
 
             builder.Property(b => b.Price)
-                .HasMaxLength(50) // giới hạn độ dài là 50 ký tự
                 .IsRequired(); // yêu cầu bắt buộc
 
             builder.Property(b => b.CreatedOn)

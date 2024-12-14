@@ -12,7 +12,7 @@ namespace Application.DTOs
         public string Author { get; set; } // varchar(50)
         public int Available { get; set; } // int(11)
         public string Publisher { get; set; } // varchar(50)
-        public string Price { get; set; } // varchar(50)
+        public long Price { get; set; } // varchar(50)
         public int IsActive { get; set; } // int(11)
 
         // Foreign Key
@@ -26,7 +26,7 @@ namespace Application.DTOs
         public string Author { get; set; } // varchar(50)
         public int Available { get; set; } // int(11)
         public string Publisher { get; set; } // varchar(50)
-        public string Price { get; set; } // varchar(50)
+        public long Price { get; set; } // varchar(50)
         public int IsActive { get; set; } // int(11)
 
         // Foreign Key

@@ -1,12 +1,13 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Interfaces
+namespace Application.Interfaces
 {
     public interface IAppDbContext
     {
@@ -18,5 +19,10 @@ namespace Domain.Interfaces
 
         DbSet<BookCatalogue> BookCatalogues { get; }
 
+        DbSet<T> Set<T>() where T : class;
+
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+        ChangeTracker ChangeTracker { get; }
     }
 }

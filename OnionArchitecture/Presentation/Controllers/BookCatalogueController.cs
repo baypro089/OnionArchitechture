@@ -1,9 +1,10 @@
 ﻿using Application.DTOs;
 using Domain.Entities;
-using Domain.Interfaces;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Application.Interfaces.Services;
 
 namespace Presentation.Controllers
 {
@@ -12,18 +13,18 @@ namespace Presentation.Controllers
     [Authorize]
     public class BookCatalogueController : ControllerBase
     {
-        public readonly IGenericRepository<BookCatalogue, BookCatalogueDTO, CreateBookCatalogueDTO> _repository;
+        public readonly IBookCatalogueService _bookCatalogueService;
 
-        public BookCatalogueController(IGenericRepository<BookCatalogue, BookCatalogueDTO, CreateBookCatalogueDTO> repository)
+        public BookCatalogueController(IBookCatalogueService bookCatalogueService)
         {
-            _repository = repository;
+            _bookCatalogueService = bookCatalogueService;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<BookCatalogueDTO>> GetAllBookCatalogue()
         {
-            var books = await _repository.GetAllAsync();
+            var books = await _bookCatalogueService.GetAllAsync();
             return Ok(books);
         }
 
@@ -31,14 +32,14 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetABookCatalogue(int id)
         {
-            var book = await _repository.GetByIdAsync(id);
+            var book = await _bookCatalogueService.GetByIdAsync(id);
             return Ok(book);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateBookCatalogue(CreateBookCatalogueDTO bookDTO)
         {
-            var response = await _repository.AddAsync(bookDTO);
+            var response = await _bookCatalogueService.AddAsync(bookDTO);
             if (response)
             {
                 return Ok("Success");
@@ -49,7 +50,7 @@ namespace Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBookCatalogue(int id, CreateBookCatalogueDTO bookDTO)
         {
-            var response = await _repository.UpdateAsync(id, bookDTO);
+            var response = await _bookCatalogueService.UpdateAsync(id, bookDTO);
             if (response) { return Ok("Success"); }
             return BadRequest("Cannot update BookCatalogue");
         }
@@ -57,7 +58,7 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBookCatalogue(int id)
         {
-            var response = await _repository.DeleteAsync(id);
+            var response = await _bookCatalogueService.DeleteAsync(id);
             if (response) { return Ok("Success"); }
             return BadRequest("Cannot delete BookCatalogue");
         }

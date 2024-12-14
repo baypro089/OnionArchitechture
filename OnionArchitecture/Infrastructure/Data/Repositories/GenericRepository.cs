@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Domain.Interfaces;
+using Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace Infrastructure.Data.Repositories
         where TDto1 : class
         where TDto2 : class
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IMapper _mapper;
         private readonly DbSet<T> _dbSet;
 
-        public GenericRepository(AppDbContext context, IMapper mapper)
+        public GenericRepository(IAppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -40,32 +41,29 @@ namespace Infrastructure.Data.Repositories
         }
 
         // Thêm mới bản ghi
-        public async Task<bool> AddAsync(TDto2 dto)
+        public async Task AddAsync(TDto2 dto)
         {
             var entity = _mapper.Map<T>(dto);
             await _dbSet.AddAsync(entity);
-            return await _context.SaveChangesAsync() > 0;
         }
 
         // Cập nhật bản ghi
-        public async Task<bool> UpdateAsync(int id, TDto2 dto)
+        public async Task UpdateAsync(int id, TDto2 dto)
         {
             var entity = await _dbSet.FindAsync(id);
             if (entity == null) throw new KeyNotFoundException("Entity not found");
 
             _mapper.Map(dto, entity);
             _dbSet.Update(entity);
-            return await _context.SaveChangesAsync() > 0;
         }
 
         // Xóa bản ghi
-        public async Task<bool> DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             var entity = await _dbSet.FindAsync(id);
             if (entity == null) throw new KeyNotFoundException("Entity not found");
 
             _dbSet.Remove(entity);
-            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
