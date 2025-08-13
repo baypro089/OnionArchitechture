@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
+using Application.DTOs;
 
 namespace Application.Services
 {
@@ -9,28 +10,30 @@ namespace Application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ITokenService _tokenService;
+        private readonly IEmailService _emailService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenService tokenService)
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenService tokenService, IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
+            _emailService = emailService;
         }
 
-        public async Task<string> RegisterAsync(string userName, string fullName, string email, string password)
+        public async Task<string> RegisterAsync(RegisterDTO registerDTO)
         {
             try
             {
                 // Tạo đối tượng user mới
                 var user = new ApplicationUser
                 {
-                    UserName = userName,
-                    FullName = fullName,
-                    Email = email  // Giả sử bạn lấy email từ userName hoặc làm tùy chọn
+                    UserName = registerDTO.UserName,
+                    FullName = registerDTO.FullName,
+                    Email = registerDTO.Email  // Giả sử bạn lấy email từ userName hoặc làm tùy chọn
                 };
 
                 // Tạo người dùng trong Identity
-                var result = await _userManager.CreateAsync(user, password);
+                var result = await _userManager.CreateAsync(user, registerDTO.Password);
 
                 if (!result.Succeeded)
                 {
@@ -43,6 +46,12 @@ namespace Application.Services
                 // Trả về token sau khi đăng ký thành công (nếu cần)
                 var token = _tokenService.GenerateToken(user);
 
+                var encodedToken = Uri.EscapeDataString(token);
+
+                var confirmLink = $"https://yourfrontend.com/verify-email?email={user.Email}&token={encodedToken}";
+
+                await _emailService.SendEmailAsync(user.Email, "Xác nhận email", $"Click để xác nhận: {confirmLink}");
+
                 return token;
             }
             catch (Exception ex)
@@ -52,10 +61,10 @@ namespace Application.Services
             }
         }
 
-        public async Task<string> AuthenticateAsync(string UserName, string Password)
+        public async Task<string> AuthenticateAsync(LoginDTO loginDTO)
 {
-            var user = await _userManager.FindByNameAsync(UserName);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, Password))
+            var user = await _userManager.FindByNameAsync(loginDTO.UserName);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, loginDTO.Password))
             {
                 throw new Exception("Invalid username or password.");
             }

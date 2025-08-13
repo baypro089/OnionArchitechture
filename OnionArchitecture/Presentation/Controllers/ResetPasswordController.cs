@@ -2,7 +2,6 @@
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -10,23 +9,23 @@ namespace Presentation.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class ResetPasswordController : ControllerBase
     {
-        private readonly IAuthService _authService;    
+        private readonly IResetPasswordService _resetPasswordService;
 
-        public AuthController(IAuthService authService)
+        public ResetPasswordController(IResetPasswordService resetPasswordService)
         {
-            _authService = authService;          
+            _resetPasswordService = resetPasswordService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("forgot")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO forgotPasswordDTO)
         {
             try
             {
-                var token = await _authService.RegisterAsync(registerDTO);
-                return Ok(new { Token = token });
+                await _resetPasswordService.HandleForgotPassword(forgotPasswordDTO.Email);
+                return Ok("If that email is registered, a reset link has been sent.");
             }
             catch (Exception ex)
             {
@@ -35,14 +34,15 @@ namespace Presentation.Controllers
             }
         }
 
-        [HttpPost("login")]
+        [HttpPost("")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO resetPasswordDTO)
         {
             try
             {
-                var token = await _authService.AuthenticateAsync(loginDTO);
-                return Ok(new { Token = token });
+                var decodedToken = Uri.UnescapeDataString(resetPasswordDTO.Token);
+                await _resetPasswordService.HandleResetPassword(resetPasswordDTO);
+                return Ok("Your password has been reset successfully.");
             }
             catch (Exception ex)
             {

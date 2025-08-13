@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.Services
 {
-    public interface IAuthService
+    public interface IVerifyEmailService
     {
-        Task<string> RegisterAsync(RegisterDTO registerDTO);
-        Task<string> AuthenticateAsync(LoginDTO loginDTO);
+        Task HandleVerifyEmail(VerifyEmailDTO verifyEmailDTO);
+        Task HandleResendVerifyEmail(string email);
     }
 }

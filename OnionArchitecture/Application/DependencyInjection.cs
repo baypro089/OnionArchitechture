@@ -17,14 +17,14 @@ namespace Application
         {
             // Đăng ký các service liên quan đến Application Layer
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IResetPasswordService, ResetPasswordService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IChangePasswordService, ChangePasswordService>();
 
             // Đăng ký TokenService tại đây
             services.AddScoped<ITokenService, TokenService>();       
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IBookService, BookServiceImpl>();
-            services.AddScoped<IGenreService, GenreServiceImpl>();
-            services.AddScoped<ICatalogueService, CatalogueServiceImpl>();
-            services.AddScoped<IBookCatalogueService, BookCatalogueServiceImpl>();
+            services.AddScoped<IVerifyEmailService, VerifyEmailService>();
             return services;
         }
     }

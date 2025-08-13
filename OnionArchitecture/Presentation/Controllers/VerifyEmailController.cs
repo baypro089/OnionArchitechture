@@ -2,7 +2,6 @@
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -10,23 +9,22 @@ namespace Presentation.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class VerifyEmailController : ControllerBase
     {
-        private readonly IAuthService _authService;    
-
-        public AuthController(IAuthService authService)
+        private readonly IVerifyEmailService _verifyEmailService;
+        public VerifyEmailController(IVerifyEmailService verifyEmailService)
         {
-            _authService = authService;          
+            _verifyEmailService = verifyEmailService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
+        public async Task<IActionResult> VerifyEmail([FromBody]VerifyEmailDTO verifyEmailDTO)
         {
             try
             {
-                var token = await _authService.RegisterAsync(registerDTO);
-                return Ok(new { Token = token });
+                await _verifyEmailService.HandleVerifyEmail(verifyEmailDTO);
+                return Ok("Your email has been verified successfully.");
             }
             catch (Exception ex)
             {
@@ -35,14 +33,14 @@ namespace Presentation.Controllers
             }
         }
 
-        [HttpPost("login")]
+        [HttpPost("resend")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
+        public async Task<IActionResult> ResendVerifyEmail([FromForm] string email)
         {
             try
             {
-                var token = await _authService.AuthenticateAsync(loginDTO);
-                return Ok(new { Token = token });
+                await _verifyEmailService.HandleResendVerifyEmail(email);
+                return Ok("A new verification email has been sent.");
             }
             catch (Exception ex)
             {

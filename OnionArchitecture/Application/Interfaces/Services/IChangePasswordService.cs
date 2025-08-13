@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.Services
 {
-    public interface IAuthService
+    public interface IChangePasswordService
     {
-        Task<string> RegisterAsync(RegisterDTO registerDTO);
-        Task<string> AuthenticateAsync(LoginDTO loginDTO);
+        Task ChangePasswordAsync(ChangePasswordDTO changePasswordDTO);
     }
 }

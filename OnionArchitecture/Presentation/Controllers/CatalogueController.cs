@@ -4,7 +4,6 @@ using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces.Services;
 
 namespace Presentation.Controllers
 {
@@ -13,18 +12,19 @@ namespace Presentation.Controllers
     [Authorize]
     public class CatalogueController : ControllerBase
     {
-        public readonly ICatalogueService _catalogueService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CatalogueController(ICatalogueService catalogueService)
+        public CatalogueController(IUnitOfWork unitOfWork)
         {
-            _catalogueService = catalogueService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<CatalogueDTO>> GetAllCatalogue()
         {
-            var data = await _catalogueService.GetAllAsync();
+            var repository = _unitOfWork.Repository<Catalogue, CatalogueDTO, CreateCatalogueDTO>();
+            var data = await repository.GetAllAsync();
             return Ok(data);
         }
 
@@ -32,15 +32,18 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetACatalogue(int id)
         {
-            var data = await _catalogueService.GetByIdAsync(id);
+            var repository = _unitOfWork.Repository<Catalogue, CatalogueDTO, CreateCatalogueDTO>();
+            var data = await repository.GetByIdAsync(id);
             return Ok(data);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateCatalogue(CreateCatalogueDTO bookDTO)
         {
-            var response = await _catalogueService.AddAsync(bookDTO);
-            if (response)
+            var repository = _unitOfWork.Repository<Catalogue, CatalogueDTO, CreateCatalogueDTO>();
+            await repository.AddAsync(bookDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result)
             {
                 return Ok("Success");
             }
@@ -50,16 +53,20 @@ namespace Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCatalogue(int id, CreateCatalogueDTO bookDTO)
         {
-            var response = await _catalogueService.UpdateAsync(id, bookDTO);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Catalogue, CatalogueDTO, CreateCatalogueDTO>();
+            await repository.UpdateAsync(id, bookDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot update CreateCatalogueDTO");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCatalogue(int id)
         {
-            var response = await _catalogueService.DeleteAsync(id);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Catalogue, CatalogueDTO, CreateCatalogueDTO>();
+            await repository.DeleteAsync(id);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot delete Catalogue");
         }
     }

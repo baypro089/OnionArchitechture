@@ -20,7 +20,7 @@ namespace Domain.Entities
         public DateTime CreatedOn { get; set; } // date
         public int IsActive { get; set; } // int(11)
 
-    // Foreign Key
+        // Foreign Key
         public int GenreId { get; set; }
         public Genre Genre { get; set; }
 

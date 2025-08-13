@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Domain.Entities;
 using Application.DTOs;
-using Application.Interfaces.Services;
+
 namespace Presentation.Controllers
 {
     [Route("api/[controller]")]
@@ -12,17 +12,18 @@ namespace Presentation.Controllers
     [Authorize]
     public class BookController : ControllerBase
     {
-        public readonly IBookService _bookService;
+        private readonly IUnitOfWork _unitOfWork;
         
-        public BookController(IBookService bookService)
+        public BookController(IUnitOfWork unitOfWork)
         {
-            _bookService = bookService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<BookDTO>> GetAllBook() {
-            var books = await _bookService.GetAllAsync();
+            var repository = _unitOfWork.Repository<Book, BookDTO, CreateBookDTO>();
+            var books = await repository.GetAllAsync();
             return Ok(books);
         }
 
@@ -30,15 +31,18 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetABook(int id)
         {
-            var book = await _bookService.GetByIdAsync(id);
+            var repository = _unitOfWork.Repository<Book, BookDTO, CreateBookDTO>();
+            var book = await repository.GetByIdAsync(id);
             return Ok(book);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateBook(CreateBookDTO bookDTO)
         {
-            var response = await _bookService.AddAsync(bookDTO);
-            if (response)
+            var repository = _unitOfWork.Repository<Book, BookDTO, CreateBookDTO>();
+            await repository.AddAsync(bookDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result)
             {
                 return Ok("Success");
             }
@@ -48,16 +52,20 @@ namespace Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, CreateBookDTO bookDTO)
         {
-            var response = await _bookService.UpdateAsync(id, bookDTO);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Book, BookDTO, CreateBookDTO>();
+            await repository.UpdateAsync(id, bookDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot update book");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var response = await _bookService.DeleteAsync(id);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Book, BookDTO, CreateBookDTO>();
+            await repository.DeleteAsync(id);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot delete book");
         }
     }

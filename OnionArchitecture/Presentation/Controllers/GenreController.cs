@@ -4,8 +4,6 @@ using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Application.Interfaces.Services;
 
 namespace Presentation.Controllers
 {
@@ -14,18 +12,19 @@ namespace Presentation.Controllers
     [Authorize]
     public class GenreController : ControllerBase
     {
-        public readonly IGenreService _genreService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GenreController(IGenreService genreService)
+        public GenreController(IUnitOfWork unitOfWork)
         {
-            _genreService = genreService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<GenreDTO>> GetAllGenre()
         {
-            var data = await _genreService.GetAllAsync();
+            var repository = _unitOfWork.Repository<Genre, GenreDTO, CreateGenreDTO>();
+            var data = await repository.GetAllAsync();
             return Ok(data);
         }
 
@@ -33,15 +32,18 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetAGenre(int id)
         {
-            var data = await _genreService.GetByIdAsync(id);
+            var repository = _unitOfWork.Repository<Genre, GenreDTO, CreateGenreDTO>();
+            var data = await repository.GetByIdAsync(id);
             return Ok(data);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateGenre(CreateGenreDTO genreDTO)
         {
-            var response = await _genreService.AddAsync(genreDTO);
-            if (response)
+            var repository = _unitOfWork.Repository<Genre, GenreDTO, CreateGenreDTO>();
+            await repository.AddAsync(genreDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result)
             {
                 return Ok("Success");
             }
@@ -51,16 +53,20 @@ namespace Presentation.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGenre(int id, CreateGenreDTO genreDTO)
         {
-            var response = await _genreService.UpdateAsync(id, genreDTO);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Genre, GenreDTO, CreateGenreDTO>();
+            await repository.UpdateAsync(id, genreDTO);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot update Genre");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
-            var response = await _genreService.DeleteAsync(id);
-            if (response) { return Ok("Success"); }
+            var repository = _unitOfWork.Repository<Genre, GenreDTO, CreateGenreDTO>();
+            await repository.DeleteAsync(id);
+            var result = await _unitOfWork.CompleteAsync() > 0;
+            if (result) { return Ok("Success"); }
             return BadRequest("Cannot delete genre");
         }
     }

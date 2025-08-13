@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.Services
 {
-    public interface IAuthService
+    public interface IResetPasswordService
     {
-        Task<string> RegisterAsync(RegisterDTO registerDTO);
-        Task<string> AuthenticateAsync(LoginDTO loginDTO);
+        Task HandleForgotPassword(string email);
+        Task HandleResetPassword(ResetPasswordDTO resetPasswordDTO);
     }
 }
